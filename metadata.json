@@ -1,0 +1,6 @@
+{
+  "name": "Orbit",
+  "description": "Clean, modern frontend application shell for Orbit, an AI Personal Assistant and Task Automation workspace.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
