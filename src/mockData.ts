@@ -1,0 +1,91 @@
+import type { Task, Activity } from './types';
+
+export const initialTasks: Task[] = [
+  {
+    id: 'task-1',
+    title: 'Review project proposal',
+    description: 'Go through architecture specs and finalize timeline with the product team.',
+    dueDate: 'Today',
+    time: '10:00 AM',
+    priority: 'High priority',
+    category: 'Work',
+    completed: false,
+  },
+  {
+    id: 'task-2',
+    title: 'Call Rahul',
+    description: 'Sync regarding client onboarding dependencies and API milestones.',
+    dueDate: 'Today',
+    time: '11:30 AM',
+    priority: 'Medium priority',
+    category: 'Communications',
+    completed: false,
+  },
+  {
+    id: 'task-3',
+    title: 'Team meeting',
+    description: 'Weekly sprint alignment and cross-functional task review.',
+    dueDate: 'Today',
+    time: '2:00 PM',
+    priority: 'Medium priority',
+    category: 'Team',
+    completed: false,
+  },
+  {
+    id: 'task-4',
+    title: 'Submit monthly report',
+    description: 'Prepare executive summary and metrics deck for departmental review.',
+    dueDate: 'Today',
+    time: '4:30 PM',
+    priority: 'High priority',
+    category: 'Finance',
+    completed: false,
+  },
+  {
+    id: 'task-5',
+    title: 'Buy groceries',
+    description: 'Fresh vegetables, milk, coffee beans, and oats.',
+    dueDate: 'Tomorrow',
+    time: '6:00 PM',
+    priority: 'Low priority',
+    category: 'Personal',
+    completed: false,
+  },
+  {
+    id: 'task-6',
+    title: 'Read research paper',
+    description: 'Review new publication on agentic workflows and tool-calling models.',
+    dueDate: 'Tomorrow',
+    time: '8:00 PM',
+    priority: 'Medium priority',
+    category: 'Research',
+    completed: false,
+  },
+];
+
+export const initialActivities: Activity[] = [
+  {
+    id: 'act-1',
+    text: 'Created task "Call Rahul"',
+    timestamp: '2 minutes ago',
+    type: 'created',
+  },
+  {
+    id: 'act-2',
+    text: 'Completed task "Read project brief"',
+    timestamp: '1 hour ago',
+    type: 'completed',
+  },
+  {
+    id: 'act-3',
+    text: 'Automation "Morning Briefing" completed',
+    timestamp: '3 hours ago',
+    type: 'automation',
+  },
+  {
+    id: 'act-4',
+    text: 'Created task "Submit monthly report"',
+    timestamp: 'Yesterday',
+    type: 'created',
+  },
+];
