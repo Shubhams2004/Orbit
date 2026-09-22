@@ -208,23 +208,15 @@ export const supabaseTaskService = {
       payload.user_id = userId;
     }
 
-    // Attempt insert. Using standard insert without chaining .select()
-    // ensures successful writes even if SELECT policies are restricted.
+    // Attempt insert and select representation
     const { data, error } = await supabase
       .from('tasks')
       .insert([payload])
       .select();
 
     if (error) {
-      // If select failed due to RLS, try inserting with minimal preference
-      const { error: insertOnlyError } = await supabase
-        .from('tasks')
-        .insert([payload]);
-
-      if (insertOnlyError) {
-        console.error('Error creating task in Supabase:', insertOnlyError);
-        throw insertOnlyError;
-      }
+      console.error('Error creating task in Supabase:', error);
+      throw error;
     }
 
     if (data && data.length > 0) {
@@ -268,15 +260,8 @@ export const supabaseTaskService = {
       .select();
 
     if (error) {
-      const { error: updateOnlyError } = await supabase
-        .from('tasks')
-        .update(payload)
-        .eq('id', task.id);
-
-      if (updateOnlyError) {
-        console.error('Error updating task in Supabase:', updateOnlyError);
-        throw updateOnlyError;
-      }
+      console.error('Error updating task in Supabase:', error);
+      throw error;
     }
 
     if (data && data.length > 0) {

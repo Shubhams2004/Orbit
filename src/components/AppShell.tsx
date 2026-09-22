@@ -74,13 +74,20 @@ export const AppShell: React.FC = () => {
       try {
         const createdTask = await supabaseTaskService.createTask(data);
         setTasks((prev) => [createdTask, ...prev]);
+        setSyncError(null);
         return;
       } catch (err) {
         console.error('Supabase create task error:', err);
+        const errorMsg =
+          err && typeof err === 'object' && 'message' in err
+            ? String(err.message)
+            : 'Failed to create task in Supabase.';
+        setSyncError(`Database error: ${errorMsg}`);
+        return;
       }
     }
 
-    // Local fallback
+    // Local fallback only when Supabase is unconfigured (demo mode)
     const newTask: Task = {
       id: `task-${Date.now()}`,
       ...data,
