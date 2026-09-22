@@ -37,12 +37,12 @@ export const TasksPage: React.FC<TasksPageProps> = ({
   const counts = useMemo(() => {
     return {
       all: tasks.length,
-      today: tasks.filter((t) => t.dueDate.toLowerCase().includes('today')).length,
+      today: tasks.filter((t) => (t.dueDate || '').toLowerCase().includes('today')).length,
       upcoming: tasks.filter(
         (t) =>
           !t.completed &&
-          (t.dueDate.toLowerCase().includes('tomorrow') ||
-            !t.dueDate.toLowerCase().includes('today'))
+          ((t.dueDate || '').toLowerCase().includes('tomorrow') ||
+            !(t.dueDate || '').toLowerCase().includes('today'))
       ).length,
       completed: tasks.filter((t) => t.completed).length,
     };
@@ -52,14 +52,14 @@ export const TasksPage: React.FC<TasksPageProps> = ({
   const filteredTasks = useMemo(() => {
     return tasks
       .filter((task) => {
+        const taskDue = (task.dueDate || '').toLowerCase();
         // Tab filter
         if (currentFilter === 'today') {
-          if (!task.dueDate.toLowerCase().includes('today')) return false;
+          if (!taskDue.includes('today')) return false;
         } else if (currentFilter === 'upcoming') {
           const isUpcoming =
             !task.completed &&
-            (task.dueDate.toLowerCase().includes('tomorrow') ||
-              !task.dueDate.toLowerCase().includes('today'));
+            (taskDue.includes('tomorrow') || !taskDue.includes('today'));
           if (!isUpcoming) return false;
         } else if (currentFilter === 'completed') {
           if (!task.completed) return false;
@@ -68,9 +68,9 @@ export const TasksPage: React.FC<TasksPageProps> = ({
         // Search query
         if (searchQuery.trim()) {
           const query = searchQuery.toLowerCase().trim();
-          const matchesTitle = task.title.toLowerCase().includes(query);
-          const matchesCategory = task.category?.toLowerCase().includes(query);
-          const matchesDesc = task.description?.toLowerCase().includes(query);
+          const matchesTitle = (task.title || '').toLowerCase().includes(query);
+          const matchesCategory = (task.category || '').toLowerCase().includes(query);
+          const matchesDesc = (task.description || '').toLowerCase().includes(query);
           if (!matchesTitle && !matchesCategory && !matchesDesc) return false;
         }
 
@@ -87,15 +87,15 @@ export const TasksPage: React.FC<TasksPageProps> = ({
         }
 
         if (currentSort === 'title') {
-          return a.title.localeCompare(b.title);
+          return (a.title || '').localeCompare(b.title || '');
         }
 
         // Default: due_date
-        const isAToday = a.dueDate.toLowerCase().includes('today');
-        const isBToday = b.dueDate.toLowerCase().includes('today');
+        const isAToday = (a.dueDate || '').toLowerCase().includes('today');
+        const isBToday = (b.dueDate || '').toLowerCase().includes('today');
         if (isAToday && !isBToday) return -1;
         if (!isAToday && isBToday) return 1;
-        return a.time.localeCompare(b.time);
+        return (a.time || '').localeCompare(b.time || '');
       });
   }, [tasks, currentFilter, searchQuery, currentSort]);
 

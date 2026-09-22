@@ -48,13 +48,13 @@ export const HomePage: React.FC<HomePageProps> = ({
   // Mock recent activity list
   const activities: Activity[] = initialActivities;
 
-  const tasksToday = tasks.filter((t) => t.dueDate.toLowerCase().includes('today'));
+  const tasksToday = tasks.filter((t) => (t.dueDate || '').toLowerCase().includes('today'));
   const completedCount = tasks.filter((t) => t.completed).length;
   const upcomingCount = tasks.filter(
     (t) =>
       !t.completed &&
-      (t.dueDate.toLowerCase().includes('tomorrow') ||
-        !t.dueDate.toLowerCase().includes('today'))
+      ((t.dueDate || '').toLowerCase().includes('tomorrow') ||
+        !(t.dueDate || '').toLowerCase().includes('today'))
   ).length;
   const displayTasks = tasksToday.length > 0 ? tasksToday.slice(0, 4) : tasks.slice(0, 4);
 

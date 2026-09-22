@@ -7,11 +7,11 @@ export default defineConfig(({ command }) => {
   return {
     // When building for GitHub Pages, assets are served from /Orbit/
     // In dev mode (e.g. AI Studio preview), use root / so live preview runs seamlessly
-    base: command === 'build' ? '/Orbit/' : '/',
+    base: process.env.VITE_BASE_PATH || (command === 'build' ? '/Orbit/' : '/'),
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, '.'),
+        '@': path.resolve('.'),
       },
     },
     server: {
