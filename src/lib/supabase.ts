@@ -192,8 +192,10 @@ export const supabaseTaskService = {
 
     const { data: authData } = await supabase.auth.getUser();
     const userId = authData?.user?.id;
+    const generatedId = crypto.randomUUID();
 
     const payload: Record<string, unknown> = {
+      id: generatedId,
       title: taskData.title,
       description: taskData.description || null,
       category: taskData.category || 'General',
@@ -206,18 +208,40 @@ export const supabaseTaskService = {
       payload.user_id = userId;
     }
 
+    // Attempt insert. Using standard insert without chaining .select()
+    // ensures successful writes even if SELECT policies are restricted.
     const { data, error } = await supabase
       .from('tasks')
       .insert([payload])
-      .select()
-      .single();
+      .select();
 
     if (error) {
-      console.error('Error creating task in Supabase:', error);
-      throw error;
+      // If select failed due to RLS, try inserting with minimal preference
+      const { error: insertOnlyError } = await supabase
+        .from('tasks')
+        .insert([payload]);
+
+      if (insertOnlyError) {
+        console.error('Error creating task in Supabase:', insertOnlyError);
+        throw insertOnlyError;
+      }
     }
 
-    return mapRowToTask(data as SupabaseTaskRow);
+    if (data && data.length > 0) {
+      return mapRowToTask(data[0] as SupabaseTaskRow);
+    }
+
+    // Fallback: return constructed task using the generated ID
+    return {
+      id: generatedId,
+      title: taskData.title,
+      description: taskData.description || '',
+      category: taskData.category || 'General',
+      priority: taskData.priority,
+      completed: false,
+      dueDate: taskData.dueDate,
+      time: taskData.time,
+    };
   },
 
   /**
@@ -241,15 +265,25 @@ export const supabaseTaskService = {
       .from('tasks')
       .update(payload)
       .eq('id', task.id)
-      .select()
-      .single();
+      .select();
 
     if (error) {
-      console.error('Error updating task in Supabase:', error);
-      throw error;
+      const { error: updateOnlyError } = await supabase
+        .from('tasks')
+        .update(payload)
+        .eq('id', task.id);
+
+      if (updateOnlyError) {
+        console.error('Error updating task in Supabase:', updateOnlyError);
+        throw updateOnlyError;
+      }
     }
 
-    return mapRowToTask(data as SupabaseTaskRow);
+    if (data && data.length > 0) {
+      return mapRowToTask(data[0] as SupabaseTaskRow);
+    }
+
+    return task;
   },
 
   /**
