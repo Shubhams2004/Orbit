@@ -11,7 +11,7 @@ import type { NavItemId, UserProfile, Task } from '../types';
 export const AppShell: React.FC = () => {
   const [activeNavId, setActiveNavId] = useState<NavItemId>('home');
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoadingTasks, setIsLoadingTasks] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
 
@@ -24,28 +24,39 @@ export const AppShell: React.FC = () => {
     role: 'Personal Assistant Workspace',
   };
 
-  // Load tasks from Supabase on mount if credentials are present
+  // Load tasks from Supabase on mount
   useEffect(() => {
     if (isConfigured) {
       setIsLoadingTasks(true);
       supabaseTaskService
         .fetchTasks()
         .then((fetchedTasks) => {
-          // If tasks exist in Supabase, replace the initial mock data with them
           setTasks(fetchedTasks);
           setSyncError(null);
         })
         .catch((err) => {
           console.error('Failed to load tasks from Supabase:', err);
-          setSyncError('Could not sync with Supabase. Operating with local data.');
+          const msg = err instanceof Error ? err.message : 'Could not fetch tasks.';
+          setSyncError(`Supabase connection error: ${msg}`);
+          setTasks([]);
         })
         .finally(() => {
           setIsLoadingTasks(false);
         });
+    } else {
+      setSyncError(
+        'Supabase is not configured. Please ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are provided.'
+      );
+      setTasks([]);
     }
   }, [isConfigured]);
 
   const handleToggleTask = async (id: string) => {
+    if (!isConfigured) {
+      setSyncError('Cannot update task: Supabase connection is not configured.');
+      return;
+    }
+
     const target = tasks.find((t) => t.id === id);
     if (!target) return;
 
@@ -56,71 +67,79 @@ export const AppShell: React.FC = () => {
       prev.map((t) => (t.id === id ? { ...t, completed: newCompleted } : t))
     );
 
-    if (isConfigured) {
-      try {
-        await supabaseTaskService.toggleTaskStatus(id, newCompleted);
-      } catch (err) {
-        console.error('Supabase toggle task status error:', err);
-        // Revert on failure
-        setTasks((prev) =>
-          prev.map((t) => (t.id === id ? { ...t, completed: !newCompleted } : t))
-        );
-      }
+    try {
+      await supabaseTaskService.toggleTaskStatus(id, newCompleted);
+      setSyncError(null);
+    } catch (err) {
+      console.error('Supabase toggle task status error:', err);
+      // Revert on failure
+      setTasks((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, completed: !newCompleted } : t))
+      );
+      const msg = err instanceof Error ? err.message : 'Failed to update task status in Supabase.';
+      setSyncError(`Database error: ${msg}`);
     }
   };
 
   const handleAddTask = async (data: Omit<Task, 'id' | 'completed'>) => {
-    if (isConfigured) {
-      try {
-        const createdTask = await supabaseTaskService.createTask(data);
-        setTasks((prev) => [createdTask, ...prev]);
-        setSyncError(null);
-        return;
-      } catch (err) {
-        console.error('Supabase create task error:', err);
-        const errorMsg =
-          err && typeof err === 'object' && 'message' in err
-            ? String(err.message)
-            : 'Failed to create task in Supabase.';
-        setSyncError(`Database error: ${errorMsg}`);
-        return;
-      }
+    if (!isConfigured) {
+      setSyncError(
+        'Cannot create task: Supabase connection is not configured. Please provide VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.'
+      );
+      return;
     }
 
-    // Local fallback only when Supabase is unconfigured (demo mode)
-    const newTask: Task = {
-      id: `task-${Date.now()}`,
-      ...data,
-      completed: false,
-    };
-    setTasks((prev) => [newTask, ...prev]);
+    try {
+      const createdTask = await supabaseTaskService.createTask(data);
+      setTasks((prev) => [createdTask, ...prev]);
+      setSyncError(null);
+    } catch (err) {
+      console.error('Supabase create task error:', err);
+      const errorMsg =
+        err && typeof err === 'object' && 'message' in err
+          ? String(err.message)
+          : 'Failed to create task in Supabase.';
+      setSyncError(`Database error: ${errorMsg}`);
+    }
   };
 
   const handleUpdateTask = async (updated: Task) => {
+    if (!isConfigured) {
+      setSyncError('Cannot edit task: Supabase connection is not configured.');
+      return;
+    }
+
     const prevTasks = tasks;
     setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
 
-    if (isConfigured) {
-      try {
-        await supabaseTaskService.updateTask(updated);
-      } catch (err) {
-        console.error('Supabase update task error:', err);
-        setTasks(prevTasks);
-      }
+    try {
+      await supabaseTaskService.updateTask(updated);
+      setSyncError(null);
+    } catch (err) {
+      console.error('Supabase update task error:', err);
+      setTasks(prevTasks);
+      const msg = err instanceof Error ? err.message : 'Failed to update task in Supabase.';
+      setSyncError(`Database error: ${msg}`);
     }
   };
 
   const handleDeleteTask = async (id: string) => {
+    if (!isConfigured) {
+      setSyncError('Cannot delete task: Supabase connection is not configured.');
+      return;
+    }
+
     const prevTasks = tasks;
     setTasks((prev) => prev.filter((t) => t.id !== id));
 
-    if (isConfigured) {
-      try {
-        await supabaseTaskService.deleteTask(id);
-      } catch (err) {
-        console.error('Supabase delete task error:', err);
-        setTasks(prevTasks);
-      }
+    try {
+      await supabaseTaskService.deleteTask(id);
+      setSyncError(null);
+    } catch (err) {
+      console.error('Supabase delete task error:', err);
+      setTasks(prevTasks);
+      const msg = err instanceof Error ? err.message : 'Failed to delete task from Supabase.';
+      setSyncError(`Database error: ${msg}`);
     }
   };
 
