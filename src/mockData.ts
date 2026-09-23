@@ -1,8 +1,9 @@
-import type { Task, Activity } from './types';
+import type { Task, Activity, Project } from './types';
 
 export const initialTasks: Task[] = [
   {
     id: 'task-1',
+    projectId: 'proj-1',
     title: 'Review project proposal',
     description: 'Go through architecture specs and finalize timeline with the product team.',
     dueDate: 'Today',
@@ -13,6 +14,7 @@ export const initialTasks: Task[] = [
   },
   {
     id: 'task-2',
+    projectId: 'proj-2',
     title: 'Call Rahul',
     description: 'Sync regarding client onboarding dependencies and API milestones.',
     dueDate: 'Today',
@@ -23,6 +25,7 @@ export const initialTasks: Task[] = [
   },
   {
     id: 'task-3',
+    projectId: 'proj-1',
     title: 'Team meeting',
     description: 'Weekly sprint alignment and cross-functional task review.',
     dueDate: 'Today',
@@ -33,6 +36,7 @@ export const initialTasks: Task[] = [
   },
   {
     id: 'task-4',
+    projectId: null,
     title: 'Submit monthly report',
     description: 'Prepare executive summary and metrics deck for departmental review.',
     dueDate: 'Today',
@@ -43,6 +47,7 @@ export const initialTasks: Task[] = [
   },
   {
     id: 'task-5',
+    projectId: null,
     title: 'Buy groceries',
     description: 'Fresh vegetables, milk, coffee beans, and oats.',
     dueDate: 'Tomorrow',
@@ -53,6 +58,7 @@ export const initialTasks: Task[] = [
   },
   {
     id: 'task-6',
+    projectId: null,
     title: 'Read research paper',
     description: 'Review new publication on agentic workflows and tool-calling models.',
     dueDate: 'Tomorrow',
@@ -87,5 +93,38 @@ export const initialActivities: Activity[] = [
     text: 'Created task "Submit monthly report"',
     timestamp: 'Yesterday',
     type: 'created',
+  },
+];
+
+export const initialProjects: Project[] = [
+  {
+    id: 'proj-1',
+    userId: null,
+    name: 'Orbit Agentic Workspace',
+    description: 'Build foundational task, project, and workflow orchestration architecture.',
+    status: 'active',
+    priority: 'high',
+    createdAt: '2026-09-20T10:00:00.000Z',
+    updatedAt: '2026-09-20T10:00:00.000Z',
+  },
+  {
+    id: 'proj-2',
+    userId: null,
+    name: 'Supabase Integration & Hardening',
+    description: 'Configure Row Level Security, project migrations, and resilient CRUD sync.',
+    status: 'active',
+    priority: 'medium',
+    createdAt: '2026-09-21T12:00:00.000Z',
+    updatedAt: '2026-09-21T12:00:00.000Z',
+  },
+  {
+    id: 'proj-3',
+    userId: null,
+    name: 'Automated CI/CD Pipeline',
+    description: 'Set up GitHub Actions to build and deploy static pages with verification.',
+    status: 'completed',
+    priority: 'low',
+    createdAt: '2026-09-19T08:00:00.000Z',
+    updatedAt: '2026-09-22T14:00:00.000Z',
   },
 ];

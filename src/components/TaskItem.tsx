@@ -1,21 +1,27 @@
 import React from 'react';
-import { Check, Clock, Calendar, Pencil, Trash2, Tag } from 'lucide-react';
+import { Check, Clock, Calendar, Pencil, Trash2, Tag, FolderKanban } from 'lucide-react';
 import { PriorityBadge } from './PriorityBadge';
-import type { Task } from '../types';
+import type { Task, Project } from '../types';
 
 interface TaskItemProps {
   task: Task;
+  projectName?: string;
+  projects?: Project[];
   onToggle: (id: string) => void;
   onEdit?: (task: Task) => void;
   onDelete?: (id: string) => void;
+  onMoveToProject?: (taskId: string, newProjectId: string | null) => void;
   compact?: boolean;
 }
 
 export const TaskItem: React.FC<TaskItemProps> = ({
   task,
+  projectName,
+  projects = [],
   onToggle,
   onEdit,
   onDelete,
+  onMoveToProject,
   compact = false,
 }) => {
   return (
@@ -61,6 +67,66 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                   <Tag className="w-2.5 h-2.5 text-zinc-400" />
                   <span>{task.category}</span>
                 </span>
+              )}
+
+              {/* Project Association (S5.4: Task Organization) */}
+              {!compact && task.projectId && projectName && (
+                <div className="relative inline-flex items-center shrink-0">
+                  <span
+                    id={`task-project-badge-${task.id}`}
+                    className="inline-flex items-center gap-1 text-[11px] font-medium text-zinc-700 bg-zinc-100/90 hover:bg-zinc-200/80 px-2 py-0.5 rounded-md border border-zinc-200/70 transition-colors"
+                  >
+                    <FolderKanban className="w-2.5 h-2.5 text-zinc-500" />
+                    <span className="max-w-[130px] truncate">{projectName}</span>
+                  </span>
+                  {onMoveToProject && projects.length > 0 && (
+                    <select
+                      id={`task-project-select-${task.id}`}
+                      value={task.projectId || ''}
+                      onChange={(e) => onMoveToProject(task.id, e.target.value || null)}
+                      aria-label={`Project for ${task.title}`}
+                      title="Move task to another project or unassign"
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full text-xs"
+                    >
+                      <option value="">None / Unassigned (Remove from project)</option>
+                      {projects.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              )}
+
+              {/* Unassigned Quick Action (Fitts's Law: 1-click assignment) */}
+              {!compact && !task.projectId && onMoveToProject && projects.length > 0 && (
+                <div className="relative inline-flex items-center shrink-0">
+                  <span
+                    id={`task-unassigned-badge-${task.id}`}
+                    className="inline-flex items-center gap-1 text-[11px] font-normal text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 px-1.5 py-0.5 rounded-md border border-dashed border-zinc-200/90 transition-colors"
+                  >
+                    <FolderKanban className="w-2.5 h-2.5 text-zinc-400" />
+                    <span>+ Project</span>
+                  </span>
+                  <select
+                    id={`task-project-select-${task.id}`}
+                    value=""
+                    onChange={(e) => onMoveToProject(task.id, e.target.value || null)}
+                    aria-label={`Assign ${task.title} to project`}
+                    title="Assign to a project"
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full text-xs"
+                  >
+                    <option value="" disabled>
+                      Assign to project...
+                    </option>
+                    {projects.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               )}
             </div>
 

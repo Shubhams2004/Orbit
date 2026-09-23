@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import type { Task, TaskPriority } from '../types';
+import type { Task, TaskPriority, Project } from '../types';
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -12,8 +12,11 @@ interface TaskModalProps {
     time: string;
     priority: TaskPriority;
     category: string;
+    projectId?: string | null;
   }) => void;
   initialTask?: Task | null;
+  projects?: Project[];
+  defaultProjectId?: string | null;
 }
 
 export const TaskModal: React.FC<TaskModalProps> = ({
@@ -21,6 +24,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   onClose,
   onSave,
   initialTask,
+  projects = [],
+  defaultProjectId,
 }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -28,6 +33,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   const [time, setTime] = useState('12:00 PM');
   const [priority, setPriority] = useState<TaskPriority>('Medium priority');
   const [category, setCategory] = useState('Work');
+  const [projectId, setProjectId] = useState<string>('');
   const [error, setError] = useState('');
 
   const isEditing = Boolean(initialTask);
@@ -40,6 +46,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       setTime(initialTask.time || '12:00 PM');
       setPriority(initialTask.priority);
       setCategory(initialTask.category || 'Work');
+      setProjectId(initialTask.projectId || '');
     } else {
       setTitle('');
       setDescription('');
@@ -47,9 +54,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       setTime('10:00 AM');
       setPriority('Medium priority');
       setCategory('Work');
+      setProjectId(defaultProjectId && defaultProjectId !== 'all' && defaultProjectId !== 'unassigned' ? defaultProjectId : '');
     }
     setError('');
-  }, [initialTask, isOpen]);
+  }, [initialTask, isOpen, defaultProjectId]);
 
   // Handle escape key
   useEffect(() => {
@@ -78,6 +86,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       time: time.trim() || '12:00 PM',
       priority,
       category: category.trim() || 'General',
+      projectId: projectId ? projectId : null,
     });
     onClose();
   };
@@ -239,6 +248,31 @@ export const TaskModal: React.FC<TaskModalProps> = ({
               />
             </div>
           </div>
+
+          {/* Project Association Row (Jakob's Law & Miller's Law) */}
+          {projects.length > 0 && (
+            <div>
+              <label
+                htmlFor="task-modal-project-select"
+                className="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5"
+              >
+                Project (Optional)
+              </label>
+              <select
+                id="task-modal-project-select"
+                value={projectId}
+                onChange={(e) => setProjectId(e.target.value)}
+                className="w-full px-3.5 py-2 bg-white text-zinc-900 text-sm rounded-xl border border-zinc-200 hover:border-zinc-300 focus:outline-none focus:border-zinc-500 transition-colors cursor-pointer"
+              >
+                <option value="">None / Unassigned</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} ({p.status})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Footer Buttons */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-100">

@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Home,
   CheckSquare,
+  FolderKanban,
   Zap,
   Bot,
   Activity,
@@ -30,6 +31,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const mainNavItems: { id: NavItemId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'tasks', label: 'Tasks', icon: CheckSquare },
+    { id: 'projects', label: 'Projects', icon: FolderKanban },
     { id: 'automations', label: 'Automations', icon: Zap },
     { id: 'assistant', label: 'Assistant', icon: Bot },
     { id: 'activity', label: 'Activity', icon: Activity },
