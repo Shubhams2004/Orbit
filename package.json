@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build && cp dist/index.html dist/404.html",
-    "build:cloudflare": "VITE_BASE_PATH=/ vite build && cp dist/index.html dist/404.html",
+    "build:cloudflare": "VITE_BASE_PATH=/ npm run build",
+    "deploy": "wrangler pages deploy dist --project-name=orbit",
+    "deploy:cloudflare": "wrangler pages deploy dist --project-name=orbit",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit"
